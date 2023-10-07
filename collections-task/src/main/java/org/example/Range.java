@@ -1,210 +1,158 @@
 package org.example;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
-
-/**
- * У цій задачи, для Чисельних типів скористуємося методом range() з інтерфейсу InstStream.
- * Він буде повертати нам вже готовий стрім з початкового до кінцевого елементу з різницею 1.
- * Для чисел з  плаваючею точкою будемо робити те саме але з початку домножимо
- * і після поділемо на 10, тим самим отримаємо різницю у 0,1.
- *
- * Для нечисельних типів будемо зміеювати наш перший елемент згідно з наданою як аргумент
- * функцією, та додавати його в Сет допоки елемент не буде рівен останньому
- * @param <T>
- */
 
 public class Range<T> implements Set<T> {
 
-    private final Set<T> innerSet;
+    private T start;
 
-    public Range(Set<T> innerSet) {
-        this.innerSet = innerSet;
+    private T end;
+
+    private Function<T, T> func;
+
+    private Range(T start, T end) {
+        this.start = start;
+        this.end = end;
     }
 
-    public static Range<Long> of(Long start, Long end) {
-
-        Set<Long> bufSet = new TreeSet<>();
-
-        if (start.equals(end)) {
-            return new Range<>(bufSet);
-        }
-
-        bufSet = LongStream
-                .range(start, end + 1)
-                .boxed()
-                .collect(Collectors.toSet());
-
-        return new Range<>(bufSet);
+    private Range(T start, T end, Function<T, T> func) {
+        this.start = start;
+        this.end = end;
+        this.func = func;
     }
 
-    public static Range<Integer> of(Integer start, Integer end) {
-
-        Set<Integer> bufSet = new TreeSet<>();
-
-        if (start.equals(end)) {
-            return new Range<>(bufSet);
-        }
-
-        bufSet = IntStream
-                .range(start, end + 1)
-                .boxed()
-                .collect(Collectors.toSet());
-
-        return new Range<>(bufSet);
-    }
-
-    public static Range<Short> of(Short start, Short end) {
-
-        Set<Short> bufSet = new TreeSet<>();
-
-        if (start.equals(end)) {
-            return new Range<>(bufSet);
-        }
-
-        bufSet = IntStream
-                .range(start, end + 1)
-                .boxed()
-                .map(o->(short)(int)o)
-                .collect(Collectors.toSet());
-
-        return new Range<>(bufSet);
-    }
-
-    public static Range<Byte> of(Byte start, Byte end) {
-
-        Set<Byte> bufSet = new TreeSet<>();
-
-        if (start.equals(end)) {
-            return new Range<>(bufSet);
-        }
-
-        bufSet = IntStream
-                .range(start, end + 1)
-                .boxed()
-                .map(o->(byte)(int)o)
-                .collect(Collectors.toSet());
-
-        return new Range<>(bufSet);
-    }
-
-    public static Range<Float> of(Float start, Float end) {
-
-        Set<Float> bufSet = new TreeSet<>();
-
-        if (start.equals(end)) {
-            return new Range<>(bufSet);
-        }
-
-        bufSet = IntStream
-                .range((int)(start*10), (int)(end*10+1))
-                .boxed()
-                .map(o->(float)o)
-                .map(o->o/10)
-                .collect(Collectors.toSet());
-
-        return new Range<>(bufSet);
-    }
-
-    public static Range<Double> of(Double start, Double end) {
-
-        Set<Double> bufSet = new TreeSet<>();
-
-        if (start.equals(end)) {
-            return new Range<>(bufSet);
-        }
-
-        bufSet = IntStream
-                .range((int)(start*10), (int)(end*10+1))
-                .boxed()
-                .map(o->(double)o)
-                .map(o->o/10)
-                .collect(Collectors.toSet());
-
-        return new Range<>(bufSet);
+    public static <E> Range<E> of(E start, E end) {
+        return new Range<>(start, end);
     }
 
     public static <E> Range<E> of(E start, E end, Function<E, E> func) {
-
-        Set<E> bufSet = new HashSet<>();
-
-        if (start.equals(end)) {
-            return new Range<>(bufSet);
-        }
-
-        while (!start.equals(func.apply(end))){
-            bufSet.add(start);
-            start = func.apply(start);
-        }
-
-        return new Range<>(bufSet);
+        return new Range<>(start, end, func);
     }
 
-    @Override
     public int size() {
-        return innerSet.size();
+
+        if (start instanceof Number && !(start instanceof Float) && !(start instanceof Double)) {
+
+            return (int) (((Number) end).longValue() + 1 - ((Number) start).longValue());
+
+        } else if ((start instanceof Float) || (start instanceof Double)) {
+
+            return (int) Math.round(((Number) end).doubleValue() * 10 + 1 - ((Number) start).doubleValue() * 10);
+
+        } else {
+            int counter = 0;
+            T bufStart = start;
+            while (!bufStart.equals(func.apply(end))) {
+                counter++;
+                bufStart = func.apply(bufStart);
+            }
+            return counter;
+        }
     }
 
-    @Override
     public boolean isEmpty() {
-        return innerSet.isEmpty();
+        return start.equals(end);
     }
 
-    @Override
     public boolean contains(Object o) {
-        return innerSet.contains(o);
+
+        if (start instanceof Number && o instanceof Number) {
+
+            if ((!(o instanceof Float || o instanceof Double) && !(start instanceof Float || start instanceof Double))
+                    || (o instanceof Float || o instanceof Double) && (start instanceof Float || start instanceof Double)) {
+
+                return ((Number) start).doubleValue() <= ((Number) o).doubleValue()
+                        && ((Number) o).doubleValue() <= ((Number) end).doubleValue();
+            }
+
+        } else if (o.getClass() == end.getClass()) {
+            T bufStart = start;
+            while (!bufStart.equals(func.apply(end))) {
+                if (o.equals(bufStart)) {
+                    return true;
+                }
+                bufStart = func.apply(bufStart);
+            }
+        }
+
+        return false;
     }
 
-    @Override
     public Iterator<T> iterator() {
-        return innerSet.iterator();
+        Iterator<T> iterator = new Iterator<T>() {
+
+            private T currentElement = start;
+
+
+            @Override
+            public boolean hasNext() {
+                if (func!=null){
+                    return !currentElement.equals(func.apply(end));
+                } else if (start instanceof Number && !(start instanceof Float) && !(start instanceof Double)) {
+                    return !currentElement.equals(((Number) end).intValue() + 1);
+                } else {
+                    return !currentElement.equals(((Number) end).floatValue() + 0.1f);
+                }
+            }
+
+            @Override
+            public T next() {
+                T buf = currentElement;
+                if (func!=null){
+                    currentElement = func.apply(currentElement);
+                } else if (start instanceof Number && !(start instanceof Float) && !(start instanceof Double)) {
+                    currentElement = (T) Integer.valueOf(((Number) currentElement).intValue() + 1);
+                } else {
+                    currentElement = (T) Float.valueOf(((Number) currentElement).floatValue() + 0.1f);
+                }
+                return buf;
+            }
+        };
+
+        return iterator;
+
     }
 
-    @Override
     public Object[] toArray() {
-        return innerSet.toArray();
+        return new Object[0];
     }
 
-    @Override
     public <T1> T1[] toArray(T1[] a) {
-        return (T1[]) innerSet.toArray(a);
+        return null;
     }
 
-    @Override
     public boolean add(T t) {
-        return innerSet.add(t);
+        return false;
     }
 
-    @Override
     public boolean remove(Object o) {
-        return innerSet.remove(o);
+        return false;
     }
 
-    @Override
     public boolean containsAll(Collection<?> c) {
-        return innerSet.containsAll(c);
+        for (var o : c) {
+            if (!this.contains(o)) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    @Override
     public boolean addAll(Collection<? extends T> c) {
-        return innerSet.addAll(c);
+        return false;
     }
 
-    @Override
     public boolean retainAll(Collection<?> c) {
-        return innerSet.retainAll(c);
+        return false;
     }
 
-    @Override
     public boolean removeAll(Collection<?> c) {
-        return innerSet.removeAll(c);
+        return false;
     }
 
-    @Override
     public void clear() {
-        innerSet.clear();
     }
 }
