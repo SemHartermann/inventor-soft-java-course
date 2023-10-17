@@ -1,14 +1,10 @@
 package com.example.restcrudtask.service;
 
-import com.example.restcrudtask.dto.RequestGameDto;
+import com.example.restcrudtask.dto.GameRequestDto;
 import com.example.restcrudtask.entity.Game;
-import com.example.restcrudtask.exception.GameNotFoundException;
-import com.example.restcrudtask.exception.NameConflictException;
 import com.example.restcrudtask.repository.GameRepository;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,18 +15,16 @@ import java.util.List;
 public class GameService {
 
     private GameRepository gameRepository;
-    public List<Game> getAllGames(){
+    public List<Game> getAllGames() {
         return gameRepository.findAll();
     }
-
-    public Game getById(Long id) throws GameNotFoundException {
+    public Game getById(Long id) {
         return gameRepository.findById(id).orElseThrow(
-                () -> new GameNotFoundException("Game not found with id: " + id));
+                () -> new IllegalArgumentException("Game not found with id: " + id));
     }
-
-    public Game editById(Long id, RequestGameDto gameDto) throws GameNotFoundException {
+    public Game editById(Long id, GameRequestDto gameDto) {
         Game game = gameRepository.findById(id).orElseThrow(
-                () -> new GameNotFoundException("Game not found with id: " + id));
+                () -> new IllegalArgumentException("Game not found with id: " + id));
         game = Game.builder()
                 .id(game.getId())
                 .name(gameDto.getName())
@@ -39,12 +33,10 @@ public class GameService {
 
         return gameRepository.save(game);
     }
-
-    public Game addGame(Game game)throws NameConflictException {
+    public Game addGame(Game game) {
         return gameRepository.save(game);
     }
-
-    public void deleteGameById(Long id){
+    public void deleteGameById(Long id) {
         gameRepository.deleteById(id);
     }
 }

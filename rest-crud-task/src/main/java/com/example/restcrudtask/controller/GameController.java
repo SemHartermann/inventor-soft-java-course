@@ -1,14 +1,11 @@
 package com.example.restcrudtask.controller;
 
-import com.example.restcrudtask.dto.RequestGameDto;
-import com.example.restcrudtask.dto.RespondGameDto;
+import com.example.restcrudtask.dto.GameRequestDto;
+import com.example.restcrudtask.dto.GameResponseDto;
 import com.example.restcrudtask.entity.Game;
-import com.example.restcrudtask.exception.GameNotFoundException;
-import com.example.restcrudtask.exception.NameConflictException;
 import com.example.restcrudtask.mapper.GameMapper;
 import com.example.restcrudtask.service.GameService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,62 +23,37 @@ import java.util.List;
 @RequestMapping("/games")
 @AllArgsConstructor
 public class GameController {
-
     private GameService gameService;
-
     private GameMapper gameMapper;
-
     @PostMapping
-    public ResponseEntity<RespondGameDto> addGame(@RequestBody RequestGameDto requestGameDto) throws NameConflictException {
-
-        Game game = gameService.addGame(gameMapper.requestGameDtoToGame(requestGameDto));
-
-        RespondGameDto respondGameDto = gameMapper.gameToRespondGameDto(game);
-
-        return new ResponseEntity<>(respondGameDto, HttpStatus.CREATED);
+    public ResponseEntity<GameResponseDto> addGame(@RequestBody GameRequestDto gameRequestDto) {
+        Game game = gameService.addGame(gameMapper.gameRequestDtoToGame(gameRequestDto));
+        GameResponseDto gameResponseDto = gameMapper.gameToGameResponseDto(game);
+        return new ResponseEntity<>(gameResponseDto, HttpStatus.CREATED);
     }
-
     @GetMapping("/{id}")
-    public ResponseEntity<RespondGameDto> getGameById(@PathVariable Long id) throws GameNotFoundException {
-
+    public ResponseEntity<GameResponseDto> getGameById(@PathVariable Long id) {
         Game game = gameService.getById(id);
-
-        RespondGameDto respondGameDto = gameMapper.gameToRespondGameDto(game);
-
-        return new ResponseEntity<>(respondGameDto, HttpStatus.OK);
+        GameResponseDto gameResponseDto = gameMapper.gameToGameResponseDto(game);
+        return new ResponseEntity<>(gameResponseDto, HttpStatus.OK);
     }
-
     @GetMapping
-    public ResponseEntity<List<RespondGameDto>> getAllGames(){
-
+    public ResponseEntity<List<GameResponseDto>> getAllGames() {
         List<Game> games = gameService.getAllGames();
-
-        List<RespondGameDto> respondGameDtos = gameMapper.gamesToRespondGameDtos(games);
-
-        return new ResponseEntity<>(respondGameDtos, HttpStatus.OK);
+        List<GameResponseDto> gameResponseDtos = gameMapper.gamesToGameResponseDtos(games);
+        return new ResponseEntity<>(gameResponseDtos, HttpStatus.OK);
     }
-
     @PutMapping("/{id}")
-    public ResponseEntity<RespondGameDto> editGameById(@PathVariable Long id,
-                                                       @RequestBody RequestGameDto requestGameDto)
-            throws GameNotFoundException {
-
-        Game game = gameService.editById(id, requestGameDto);
-
-        RespondGameDto respondGameDto = gameMapper.gameToRespondGameDto(game);
-
-        return new ResponseEntity<>(respondGameDto, HttpStatus.OK);
+    public ResponseEntity<GameResponseDto> editGameById(@PathVariable Long id,
+                                                        @RequestBody GameRequestDto gameRequestDto) {
+        Game game = gameService.editById(id, gameRequestDto);
+        GameResponseDto gameResponseDto = gameMapper.gameToGameResponseDto(game);
+        return new ResponseEntity<>(gameResponseDto, HttpStatus.OK);
     }
-
     @DeleteMapping("/{id}")
-    public ResponseEntity<RespondGameDto> deleteGameById(@PathVariable Long id) throws GameNotFoundException {
-
-        Game game = gameService.getById(id);
-
+    public HttpStatus deleteGameById(@PathVariable Long id) {
+        gameService.getById(id);
         gameService.deleteGameById(id);
-
-        RespondGameDto respondGameDto = gameMapper.gameToRespondGameDto(game);
-
-        return new ResponseEntity<>(respondGameDto, HttpStatus.NO_CONTENT);
+        return HttpStatus.NO_CONTENT;
     }
 }

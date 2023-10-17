@@ -1,7 +1,7 @@
 package com.example.restcrudtask.mapper;
 
-import com.example.restcrudtask.dto.RequestGameDto;
-import com.example.restcrudtask.dto.RespondGameDto;
+import com.example.restcrudtask.dto.GameRequestDto;
+import com.example.restcrudtask.dto.GameResponseDto;
 import com.example.restcrudtask.entity.Game;
 import org.mapstruct.Mapper;
 
@@ -9,9 +9,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface GameMapper{
-
-    RespondGameDto gameToRespondGameDto(Game game);
-    Game requestGameDtoToGame(RequestGameDto requestGameDto);
-    List<RespondGameDto> gamesToRespondGameDtos(List<Game> games);
-
+    GameResponseDto gameToGameResponseDto(Game game);
+    Game gameRequestDtoToGame(GameRequestDto gameRequestDto);
+    List<GameResponseDto> gamesToGameResponseDtos(List<Game> games);
 }

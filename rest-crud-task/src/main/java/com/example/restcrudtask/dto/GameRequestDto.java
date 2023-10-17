@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RequestGameDto {
+public class GameRequestDto {
     private String name;
     private String genre;
 }
