@@ -23,7 +23,7 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public Map<String, String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         Map<String, String> errorMap = new HashMap<>();
-        errorMap.put("errorMessage", ex.getMessage());
+        errorMap.put("errorMessage", "A game with the same name already exists, do not repeat the request with this data");
         return errorMap;
     }
 
