@@ -2,7 +2,6 @@ package com.example.task.filter;
 
 import com.example.task.service.AuthenticationService;
 import com.example.task.service.JwtService;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

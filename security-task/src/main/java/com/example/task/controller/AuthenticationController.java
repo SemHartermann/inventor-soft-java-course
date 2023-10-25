@@ -2,14 +2,13 @@ package com.example.task.controller;
 
 import com.example.task.dto.UserRequestDto;
 import com.example.task.dto.UserResponseDto;
-import com.example.task.entity.User;
 import com.example.task.entity.Role;
+import com.example.task.entity.User;
 import com.example.task.mapper.UserMapper;
 import com.example.task.service.AuthenticationService;
 import com.example.task.service.JwtService;
 import com.example.task.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

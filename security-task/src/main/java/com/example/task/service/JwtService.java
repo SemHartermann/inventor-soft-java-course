@@ -19,7 +19,7 @@ import java.util.function.Function;
 public class JwtService {
 
     @Value("${jwt.secret}")
-    private String secretKey = "koxelJPNOmdGTDaHkqL1D+vAhA9PXiddCi00q1UDEL0TEoB3RxlKQ1p0bPX9esoJjNWqL6yoPwjjBhbqPOpRXTZl4ceDypJaEsjVFJgp+LE=";
+    private String secretKey;
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }

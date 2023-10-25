@@ -1,6 +1,5 @@
 package com.example.task.config;
 
-import com.example.task.entity.Role;
 import com.example.task.filter.CsrfCookieFilter;
 import com.example.task.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
@@ -8,8 +7,6 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -21,14 +18,12 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -48,8 +43,6 @@ public class SecurityConfig {
         http.csrf(csrfConfigurer ->
                 csrfConfigurer.ignoringRequestMatchers(
                                 mvcMatcherBuilder.pattern("/**")
-                                /*, mvcMatcherBuilder.pattern("/register")
-                                , mvcMatcherBuilder.pattern("/login")*/
                                 , PathRequest.toH2Console())
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
 
