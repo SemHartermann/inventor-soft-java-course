@@ -26,24 +26,28 @@ import java.util.List;
 public class GameController {
     private GameService gameService;
     private GameMapper gameMapper;
+
     @PostMapping("/add")
     public ResponseEntity<GameResponseDto> addGame(@RequestBody GameRequestDto gameRequestDto) {
         Game game = gameService.addGame(gameMapper.gameRequestDtoToGame(gameRequestDto));
         GameResponseDto gameResponseDto = gameMapper.gameToGameResponseDto(game);
         return new ResponseEntity<>(gameResponseDto, HttpStatus.CREATED);
     }
+
     @GetMapping("/get/{id}")
     public ResponseEntity<GameResponseDto> getGameById(@PathVariable Long id) {
         Game game = gameService.getById(id);
         GameResponseDto gameResponseDto = gameMapper.gameToGameResponseDto(game);
         return new ResponseEntity<>(gameResponseDto, HttpStatus.OK);
     }
+
     @GetMapping("/get")
     public ResponseEntity<List<GameResponseDto>> getAllGames() {
         List<Game> games = gameService.getAllGames();
         List<GameResponseDto> gameResponseDtos = gameMapper.gamesToGameResponseDtos(games);
         return new ResponseEntity<>(gameResponseDtos, HttpStatus.OK);
     }
+
     @PutMapping("/edit/{id}")
     public ResponseEntity<GameResponseDto> editGameById(@PathVariable Long id,
                                                         @RequestBody GameRequestDto gameRequestDto) {
@@ -51,6 +55,7 @@ public class GameController {
         GameResponseDto gameResponseDto = gameMapper.gameToGameResponseDto(game);
         return new ResponseEntity<>(gameResponseDto, HttpStatus.OK);
     }
+
     @DeleteMapping("/delete/{id}")
     public HttpStatus deleteGameById(@PathVariable Long id) {
         gameService.getById(id);

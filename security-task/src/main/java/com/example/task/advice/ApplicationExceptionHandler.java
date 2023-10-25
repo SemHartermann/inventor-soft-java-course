@@ -1,5 +1,6 @@
 package com.example.task.advice;
 
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,8 +24,7 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public Map<String, String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         Map<String, String> errorMap = new HashMap<>();
-        errorMap.put("errorMessage", "A game with the same name already exists, do not repeat the request with this data");
+        errorMap.put("errorMessage", ex.getMessage());
         return errorMap;
     }
-
 }

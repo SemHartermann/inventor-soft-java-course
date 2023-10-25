@@ -13,17 +13,17 @@ import java.util.List;
 @Setter
 public class UserService {
     private UserRepository userRepository;
-    public List<User> getAllCustomers() {
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-    public User getByEmail(String email) {
+    public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(
-                () -> new IllegalArgumentException("Customer not found with login: " + email));
+                () -> new IllegalArgumentException("User not found with login: " + email));
     }
-    public User addCustomer(User user) {
+    public User addUser(User user) {
         return userRepository.save(user);
     }
-    public void deleteCustomerById(Long id) {
+    public void deleteUserById(Long id) {
         userRepository.deleteById(id);
     }
 }

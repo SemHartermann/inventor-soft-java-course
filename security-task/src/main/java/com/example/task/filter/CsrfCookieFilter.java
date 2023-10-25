@@ -23,7 +23,8 @@ public class CsrfCookieFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getServletPath().equals("/csrf");
+        return !request.getServletPath().equals("/csrf")
+                || !request.getServletPath().equals("/form");
     }
 
 }

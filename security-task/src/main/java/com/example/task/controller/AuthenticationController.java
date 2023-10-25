@@ -8,6 +8,8 @@ import com.example.task.mapper.UserMapper;
 import com.example.task.service.AuthenticationService;
 import com.example.task.service.JwtService;
 import com.example.task.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping()
 @RequiredArgsConstructor
 public class AuthenticationController {
-
     private final AuthenticationService authenticationService;
     private final UserService userService;
     private final UserMapper userMapper;
@@ -30,32 +31,32 @@ public class AuthenticationController {
     private final JwtService jwtService;
 
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody UserRequestDto userRequestDto) {
-        ResponseEntity response = null;
-        try {
-            String hashPwd = passwordEncoder.encode(userRequestDto.getPassword());
-            userRequestDto.setPassword(hashPwd);
-            User user = userMapper.userRequestDtoToUser(userRequestDto);
-            user.setRole(Role.USER);
-            user = userService.addCustomer(user);
-            /*UserResponseDto customerResponseDto = customerMapper.userToUserResponseDto(customer);*/
-            if (user.getId() > 0) {
-                response = ResponseEntity
-                        .status(HttpStatus.CREATED)
-                        .body(user);
-            }
-        } catch (Exception ex) {
-            response = ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An exception occured due to " + ex.getMessage());
-        }
-        return response;
+    public ResponseEntity<UserResponseDto> registerUser(
+            @RequestBody UserRequestDto userRequestDto) {
+        String hashPwd = passwordEncoder.encode(userRequestDto.getPassword());
+
+        userRequestDto.setPassword(hashPwd);
+
+        User user = userMapper.userRequestDtoToUser(userRequestDto);
+        user.setRole(Role.USER);
+        user = userService.addUser(user);
+
+        UserResponseDto userResponseDto = userMapper.userToUserResponseDto(user);
+
+        return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
     }
 
     @RequestMapping("/login")
-    public ResponseEntity<UserResponseDto> getUserDetailsAfterLogin(@RequestBody UserRequestDto userRequestDto) {
-        User user = authenticationService.authenticate(userMapper.userRequestDtoToUser(userRequestDto));
+    public ResponseEntity<UserResponseDto> getUserDetailsAfterLogin(
+            @RequestBody UserRequestDto userRequestDto
+            , HttpServletRequest request
+    ) {
+        User user = userService.getUserByEmail(userRequestDto.getEmail());
+
+        authenticationService.authenticate(user, request);
+
         UserResponseDto userResponseDto = userMapper.userToUserResponseDto(user);
+
         return ResponseEntity.ok()
                 .header(
                         HttpHeaders.AUTHORIZATION,
@@ -63,5 +64,4 @@ public class AuthenticationController {
                 )
                 .body(userResponseDto);
     }
-
 }

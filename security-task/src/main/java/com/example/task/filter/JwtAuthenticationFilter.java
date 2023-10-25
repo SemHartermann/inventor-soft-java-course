@@ -1,32 +1,28 @@
 package com.example.task.filter;
 
+import com.example.task.service.AuthenticationService;
 import com.example.task.service.JwtService;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final AuthenticationService authenticationService;
 
     @Override
     protected void doFilterInternal(
@@ -35,41 +31,53 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userLogin;
-        if (authHeader == null || !authHeader.startsWith("Bearer ")){
-            filterChain.doFilter(request, response);
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            notValidTokenResponse(response);
             return;
         }
-        jwt = authHeader.split(" ")[1].trim();
-        userLogin = jwtService.extractUsername(jwt);
-        if (userLogin==null && SecurityContextHolder.getContext().getAuthentication() == null){
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "The token is not valid.");
+
+        String jwt = authHeader.split(" ")[1].trim();
+
+        String userLogin = null;
+        UserDetails userDetails = null;
+
+        try {
+            userLogin = jwtService.extractUsername(jwt);
+            userDetails = userDetailsService.loadUserByUsername(userLogin);
+        } catch (SignatureException exception) {
+            exception.printStackTrace();
         }
-        if (userLogin!=null && SecurityContextHolder.getContext().getAuthentication() == null){
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userLogin);
-            if (jwtService.isTokenValid(jwt, userDetails)){
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            } else {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "The token is not valid.");
-            }
+
+        if (userLogin == null) {
+            notValidTokenResponse(response);
+            return;
         }
+
+        if (!jwtService.isTokenValid(jwt, userDetails)) {
+            notValidTokenResponse(response);
+            return;
+        }
+
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            authenticationService.authenticate(userDetails, request);
+        }
+
         filterChain.doFilter(request, response);
+    }
+
+    private void notValidTokenResponse(HttpServletResponse response) throws IOException {
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "The token is not valid.");
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return request.getServletPath().equals("/login")
-                ||  request.getServletPath().equals("/register");
+                || request.getServletPath().equals("/register")
+                || request.getServletPath().equals("/form")
+                || request.getServletPath().equals("/csrf")
+                || request.getServletPath().equals("/h2");
     }
 
 }

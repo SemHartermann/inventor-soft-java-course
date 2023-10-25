@@ -6,47 +6,34 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
 @Service
 @NoArgsConstructor
 public class JwtService {
 
-    /*@Value("${jwt.secret}")*/
-    private final static String SECRET_KEY = "koxelJPNOmdGTDaHkqL1D+vAhA9PXiddCi00q1UDEL0TEoB3RxlKQ1p0bPX9esoJjNWqL6yoPwjjBhbqPOpRXTZl4ceDypJaEsjVFJgp+LE=";
+    @Value("${jwt.secret}")
+    private String secretKey = "koxelJPNOmdGTDaHkqL1D+vAhA9PXiddCi00q1UDEL0TEoB3RxlKQ1p0bPX9esoJjNWqL6yoPwjjBhbqPOpRXTZl4ceDypJaEsjVFJgp+LE=";
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
     public String generateToken(UserDetails userDetails){
-        return generateToken(new HashMap<>(), userDetails);
-    }
-
-    public String generateToken(Map<String, Object> claims, UserDetails userDetails){
         return Jwts
                 .builder()
-                .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 *60 * 60 * 24))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver){
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -62,7 +49,7 @@ public class JwtService {
     }
 
     private Key getSignInKey(){
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

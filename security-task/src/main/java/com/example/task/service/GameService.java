@@ -25,6 +25,7 @@ public class GameService {
     public Game editById(Long id, GameRequestDto gameDto) {
         Game game = gameRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("Game not found with id: " + id));
+
         game = Game.builder()
                 .id(game.getId())
                 .name(gameDto.getName())
