@@ -1,20 +1,21 @@
 package com.example.task.service;
 
-import io.jsonwebtoken.Claims;
+import com.example.task.entity.Role;
+import com.example.task.entity.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.jackson.io.JacksonDeserializer;
+import io.jsonwebtoken.lang.Maps;
+import jakarta.xml.bind.DatatypeConverter;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 @Service
 @NoArgsConstructor
@@ -22,62 +23,42 @@ public class JwtService {
 
     @Value("${jwt.secret}")
     private String secretKey;
-    public UserDetails extractUser(String token) {
-        return extractClaim(token, new Function<Claims, UserDetails>() {
-            @Override
-            public UserDetails apply(Claims claims) {
-                return claims.get("User", UserDetails.class);
-            }
-        });
+
+    public Role extractRole(String token) {
+        return Jwts.parser()
+                .json(new JacksonDeserializer(Maps.of("role", Role.class).build()))
+                .verifyWith(getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("role", Role.class);
     }
 
-    public String generateToken(UserDetails userDetails){
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("User", userDetails);
+    public String extractEmail(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+    }
+
+    public String generateToken(User user){
+        Map<String, Role> claims = new HashMap<>();
+        claims.put("role", user.getRole());
 
         return Jwts
                 .builder()
-                .setSubject(userDetails.getUsername())
-                .setClaims(claims)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 *60 * 60 * 24))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .subject(user.getUsername())
+                .claims(claims)
+                .expiration(new Date(System.currentTimeMillis() + 1000 *60 * 60 * 24))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS512)
                 .compact();
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver){
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
-    }
-
-    private Claims extractAllClaims(String token){
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignInKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-    private Key getSignInKey(){
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    public boolean isTokenValid(String token){
-        try {
-            Jwts.parserBuilder().setSigningKey(getSignInKey()).build();
-            return (!isTokenExpired(token));
-        }catch (Exception ex){
-            return false;
-        }
-    }
-
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+    private SecretKey getSignInKey(){
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS512;
+        byte[] secretBytes = DatatypeConverter.parseBase64Binary(secretKey);
+        return new SecretKeySpec(secretBytes, signatureAlgorithm.getJcaName());
     }
 }

@@ -3,15 +3,13 @@ package com.example.task.filter;
 import com.example.task.entity.User;
 import com.example.task.service.AuthenticationService;
 import com.example.task.service.JwtService;
-import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,7 +19,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
     private final AuthenticationService authenticationService;
 
     @Override
@@ -40,16 +37,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String jwt = authHeader.split(" ")[1].trim();
 
+        try{
+            UserDetails userDetails = User
+                                        .builder()
+                                        .email(jwtService.extractEmail(jwt))
+                                        .role(jwtService.extractRole(jwt))
+                                        .build();
 
-        if (!jwtService.isTokenValid(jwt)) {
+            authenticationService.authenticate(userDetails, request);
+
+        } catch (JwtException ex){
             notValidTokenResponse(response);
             return;
-        }
-
-        UserDetails userDetails = jwtService.extractUser(jwt);
-
-        if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            authenticationService.authenticate(userDetails, request);
         }
 
         filterChain.doFilter(request, response);
@@ -61,8 +60,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getServletPath().equals("/login")
-                || request.getServletPath().equals("/register")
+        return request.getServletPath().equals("/auth/login")
+                || request.getServletPath().equals("/auth/register")
                 || request.getServletPath().equals("/form")
                 || request.getServletPath().equals("/csrf")
                 || request.getServletPath().equals("/h2");

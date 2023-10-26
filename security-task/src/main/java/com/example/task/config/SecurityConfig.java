@@ -51,11 +51,7 @@ public class SecurityConfig {
         http.headers(headersConfigurer ->
                 headersConfigurer.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
 
-
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        http.exceptionHandling()
-                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
 
         http.authorizeHttpRequests(auth ->
                         auth

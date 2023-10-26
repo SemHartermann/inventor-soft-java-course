@@ -52,8 +52,6 @@ public class AuthenticationController {
     ) {
         User user = userService.getUserByEmail(userRequestDto.getEmail());
 
-        user.setPassword(null);
-
         authenticationService.authenticate(user, request);
 
         UserResponseDto userResponseDto = userMapper.userToUserResponseDto(user);
