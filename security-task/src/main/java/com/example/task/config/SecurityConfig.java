@@ -31,6 +31,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CsrfCookieFilter csrfCookieFilter;
 
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http,
@@ -61,11 +62,11 @@ public class SecurityConfig {
                                 .requestMatchers(mvcMatcherBuilder.pattern("/games/add")).hasRole("ADMIN")
                                 .requestMatchers(mvcMatcherBuilder.pattern("/games/edit**")).hasRole("ADMIN")
                                 .requestMatchers(mvcMatcherBuilder.pattern("/games/delete**")).hasRole("ADMIN")
-                                .requestMatchers(mvcMatcherBuilder.pattern("/games**")).hasRole("USER")
+                                .requestMatchers(mvcMatcherBuilder.pattern("/games**")).authenticated()
                                 .requestMatchers(mvcMatcherBuilder.pattern("/**")).permitAll())
 
 
-                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(csrfCookieFilter, BasicAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

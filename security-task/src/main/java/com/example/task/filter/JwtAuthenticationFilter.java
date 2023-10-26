@@ -1,5 +1,6 @@
 package com.example.task.filter;
 
+import com.example.task.entity.User;
 import com.example.task.service.AuthenticationService;
 import com.example.task.service.JwtService;
 import io.jsonwebtoken.security.SignatureException;
@@ -39,25 +40,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String jwt = authHeader.split(" ")[1].trim();
 
-        String userLogin = null;
-        UserDetails userDetails = null;
 
-        try {
-            userLogin = jwtService.extractUsername(jwt);
-            userDetails = userDetailsService.loadUserByUsername(userLogin);
-        } catch (SignatureException exception) {
-            exception.printStackTrace();
-        }
-
-        if (userLogin == null) {
+        if (!jwtService.isTokenValid(jwt)) {
             notValidTokenResponse(response);
             return;
         }
 
-        if (!jwtService.isTokenValid(jwt, userDetails)) {
-            notValidTokenResponse(response);
-            return;
-        }
+        UserDetails userDetails = jwtService.extractUser(jwt);
 
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             authenticationService.authenticate(userDetails, request);

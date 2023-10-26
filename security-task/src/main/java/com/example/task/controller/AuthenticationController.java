@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping()
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
@@ -51,6 +51,8 @@ public class AuthenticationController {
             , HttpServletRequest request
     ) {
         User user = userService.getUserByEmail(userRequestDto.getEmail());
+
+        user.setPassword(null);
 
         authenticationService.authenticate(user, request);
 
