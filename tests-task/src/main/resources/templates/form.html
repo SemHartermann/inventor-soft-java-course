@@ -1,0 +1,11 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>CSRF Form</title>
+</head>
+<body>
+<h1>I WILL GIVE YOU CSRF TOKEN</h1>
+<form th:action="@{/csrf}" method="get">
+    <input type="submit" value="TAKE IT" />
+</form>
+</body>
+</html>
