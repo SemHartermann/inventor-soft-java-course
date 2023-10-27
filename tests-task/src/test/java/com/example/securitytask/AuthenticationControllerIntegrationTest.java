@@ -57,24 +57,14 @@ public class AuthenticationControllerIntegrationTest {
         assertThat(Objects.requireNonNull(responseEntity.getBody()).getEmail()).isEqualTo("user@gmail.com");
         assertThat(Objects.requireNonNull(responseEntity.getBody()).getRole()).isEqualTo("USER");
 
-        assertThatNoException().isThrownBy(
-                ()->jwtService.extractEmail(
-                        String.valueOf(Objects.requireNonNull(responseEntity.getHeaders().get(HttpHeaders.AUTHORIZATION)).get(0))
-                )
-        );
+        String jwt = String.valueOf(Objects.requireNonNull(responseEntity.getHeaders().get(HttpHeaders.AUTHORIZATION)).get(0));
 
-        assertThat(jwtService.extractEmail(
-                String.valueOf(Objects.requireNonNull(responseEntity.getHeaders().get(HttpHeaders.AUTHORIZATION)).get(0)))
-        ).isEqualTo("user@gmail.com");
+        assertThatNoException().isThrownBy(()->jwtService.extractEmail(jwt));
 
-        assertThatNoException().isThrownBy(
-                ()->jwtService.extractRole(
-                        String.valueOf(Objects.requireNonNull(responseEntity.getHeaders().get(HttpHeaders.AUTHORIZATION)).get(0))
-                )
-        );
+        assertThat(jwtService.extractEmail(jwt)).isEqualTo("user@gmail.com");
 
-        assertThat(jwtService.extractRole(
-                String.valueOf(Objects.requireNonNull(responseEntity.getHeaders().get(HttpHeaders.AUTHORIZATION)).get(0)))
-        ).isEqualTo(Role.USER);
+        assertThatNoException().isThrownBy(()->jwtService.extractRole(jwt));
+
+        assertThat(jwtService.extractRole(jwt)).isEqualTo(Role.USER);
     }
 }
