@@ -2,6 +2,7 @@ package com.example.task.service;
 
 import com.example.task.entity.Role;
 import com.example.task.entity.User;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.jackson.io.JacksonDeserializer;
@@ -24,7 +25,7 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    public Role extractRole(String token) {
+    public Role extractRole(String token) throws JwtException {
         return Jwts.parser()
                 .json(new JacksonDeserializer(Maps.of("role", Role.class).build()))
                 .verifyWith(getSignInKey())
@@ -34,7 +35,7 @@ public class JwtService {
                 .get("role", Role.class);
     }
 
-    public String extractEmail(String token) {
+    public String extractEmail(String token) throws JwtException {
         return Jwts.parser()
                 .verifyWith(getSignInKey())
                 .build()
