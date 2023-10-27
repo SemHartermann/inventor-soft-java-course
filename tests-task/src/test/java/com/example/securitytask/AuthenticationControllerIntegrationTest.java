@@ -27,7 +27,7 @@ public class AuthenticationControllerIntegrationTest {
     private TestRestTemplate restTemplate = new TestRestTemplate();
 
     @Test
-    void testRegisterUser() throws Exception {
+    void UserRegistration_ValidUser_UserSuccessfullyRegistered() throws Exception {
 
         UserRequestDto userRequestDto = new UserRequestDto();
         userRequestDto.setEmail("register@example.com");
@@ -43,7 +43,7 @@ public class AuthenticationControllerIntegrationTest {
     }
 
     @Test
-    void testLoginUser() throws Exception {
+    void UserLogining_ValidUser_UserSuccessfullyLogined() throws Exception {
 
         UserRequestDto userRequestDto = new UserRequestDto();
         userRequestDto.setEmail("user@gmail.com");
@@ -59,11 +59,11 @@ public class AuthenticationControllerIntegrationTest {
 
         String jwt = String.valueOf(Objects.requireNonNull(responseEntity.getHeaders().get(HttpHeaders.AUTHORIZATION)).get(0));
 
-        assertThatNoException().isThrownBy(()->jwtService.extractEmail(jwt));
+        assertThatNoException().isThrownBy(() -> jwtService.extractEmail(jwt));
 
         assertThat(jwtService.extractEmail(jwt)).isEqualTo("user@gmail.com");
 
-        assertThatNoException().isThrownBy(()->jwtService.extractRole(jwt));
+        assertThatNoException().isThrownBy(() -> jwtService.extractRole(jwt));
 
         assertThat(jwtService.extractRole(jwt)).isEqualTo(Role.USER);
     }

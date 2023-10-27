@@ -31,7 +31,7 @@ public class GamesControllerIntegrationTest {
     private TestRestTemplate restTemplate = new TestRestTemplate();
 
     @Test
-    void testAddGameForAdmin() throws Exception {
+    void GameAdding_ValidGame_GameSuccessfullyAdded() throws Exception {
 
         User user = userService.getUserByEmail("admin@gmail.com");
 
@@ -56,7 +56,7 @@ public class GamesControllerIntegrationTest {
     }
 
     @Test
-    void testAddGameForUser() throws Exception {
+    void GameAdding_ValidGame_GameNotSuccessfullyAdded() throws Exception {
 
         User user = userService.getUserByEmail("user@gmail.com");
 
