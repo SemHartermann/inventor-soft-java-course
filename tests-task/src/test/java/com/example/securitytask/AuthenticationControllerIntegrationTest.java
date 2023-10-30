@@ -12,6 +12,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 import java.util.Objects;
 
@@ -66,5 +67,35 @@ public class AuthenticationControllerIntegrationTest {
         assertThatNoException().isThrownBy(() -> jwtService.extractRole(jwt));
 
         assertThat(jwtService.extractRole(jwt)).isEqualTo(Role.USER);
+    }
+
+    @Test
+    void UserLogining_ValidUser_UserNotFound() throws Exception {
+
+        UserRequestDto userRequestDto = new UserRequestDto();
+        userRequestDto.setEmail("eviluser@gmail.com");
+        userRequestDto.setPassword("user");
+
+        String url = "http://localhost:8080/auth/login";
+
+        ResponseEntity<UserResponseDto> responseEntity = restTemplate.postForEntity(url, userRequestDto, UserResponseDto.class);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void UserLogining_ValidUser_IncorrectPassword() throws Exception {
+
+        UserRequestDto userRequestDto = new UserRequestDto();
+        userRequestDto.setEmail("user@gmail.com");
+        userRequestDto.setPassword("evil");
+
+        String url = "http://localhost:8080/auth/login";
+
+        restTemplate.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+
+        ResponseEntity<String> responseEntity = restTemplate.getRestTemplate().postForEntity(url, userRequestDto, String.class);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 }

@@ -46,21 +46,27 @@ public class AuthenticationController {
     }
 
     @RequestMapping("/login")
-    public ResponseEntity<UserResponseDto> getUserDetailsAfterLogin(
+    public ResponseEntity getUserDetailsAfterLogin(
             @RequestBody UserRequestDto userRequestDto
             , HttpServletRequest request
     ) {
         User user = userService.getUserByEmail(userRequestDto.getEmail());
 
-        authenticationService.authenticate(user, request);
+        if (passwordEncoder.matches(userRequestDto.getPassword(), user.getPassword())){
 
-        UserResponseDto userResponseDto = userMapper.userToUserResponseDto(user);
+            authenticationService.authenticate(user, request);
 
-        return ResponseEntity.ok()
-                .header(
-                        HttpHeaders.AUTHORIZATION,
-                        jwtService.generateToken(user)
-                )
-                .body(userResponseDto);
+            UserResponseDto userResponseDto = userMapper.userToUserResponseDto(user);
+
+            return ResponseEntity.ok()
+                    .header(
+                            HttpHeaders.AUTHORIZATION,
+                            jwtService.generateToken(user)
+                    )
+                    .body(userResponseDto);
+        } else {
+            return ResponseEntity.status(401)
+                    .body("Incorrect password");
+        }
     }
 }
