@@ -1,6 +1,7 @@
 package org.example.dao.h2impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.DBManager;
 import org.example.dao.UserDao;
 import org.example.entity.User;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoHTwoImpl implements UserDao {
-    private static final Logger LOG = Logger.getLogger(UserDaoHTwoImpl.class);
+    private static final Logger LOG = LogManager.getLogger(UserDaoHTwoImpl.class);
 
     private static final String SQL_ADD_NEW_USER = "INSERT INTO \"user\" (email, password, id) VALUES (?, ?, default)";
     private static final String SQL_FIND_ALL_USERS = "SELECT * FROM \"user\"";
@@ -26,8 +27,7 @@ public class UserDaoHTwoImpl implements UserDao {
 
     public boolean deleteUserById(Long id) throws SQLException {
         try (Connection con = DBManager.getInstance().getConnection();
-             PreparedStatement preparedStatement = con.prepareStatement(SQL_DELETE_USER_BY_ID))
-        {
+             PreparedStatement preparedStatement = con.prepareStatement(SQL_DELETE_USER_BY_ID)) {
             preparedStatement.setLong(1, id);
             int count = preparedStatement.executeUpdate();
             if (count < 1) {
@@ -40,7 +40,7 @@ public class UserDaoHTwoImpl implements UserDao {
         return true;
     }
 
-    public User addUser(User user) throws SQLException{
+    public User addUser(User user) throws SQLException {
         try (Connection con = DBManager.getInstance().getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(SQL_ADD_NEW_USER)) {
             preparedStatement.setString(1, user.getEmail());

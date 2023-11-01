@@ -1,6 +1,7 @@
 package org.example.dao.h2impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.DBManager;
 import org.example.dao.GameDao;
 import org.example.entity.Game;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class GameDaoHTwoImpl implements GameDao {
 
-    private static final Logger LOG = Logger.getLogger(GameDaoHTwoImpl.class);
+    private static final Logger LOG = LogManager.getLogger(GameDaoHTwoImpl.class);
 
     private static final String SQL_ADD_NEW_GAME = "INSERT INTO game (name, genre, id) VALUES (?, ?, default)";
     private static final String SQL_FIND_ALL_GAMES = "SELECT * FROM game";
