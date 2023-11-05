@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" version="2.1">
+
+    <persistence-unit name="BasicEntitiesPostgres">
+        <class>org.example.entity.Game</class>
+        <class>org.example.entity.User</class>
+
+        <properties>
+            <property name="hibernate.connection.url" value="jdbc:postgresql://localhost:5432/rest-crud-task"/>
+            <property name="hibernate.connection.driver_class" value="org.postgresql.Driver"/>
+            <property name="hibernate.connection.username" value="postgres"/>
+            <property name="hibernate.connection.password" value="root"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.hbm2ddl.auto" value="create"/>
+        </properties>
+    </persistence-unit>
+
+    <persistence-unit name="BasicEntitiesH2">
+        <class>org.example.entity.Game</class>
+        <class>org.example.entity.User</class>
+
+        <properties>
+            <property name="hibernate.connection.url" value="jdbc:h2:mem:memDB;DB_CLOSE_DELAY=-1"/>
+            <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
+            <property name="hibernate.connection.username" value="sa"/>
+            <property name="hibernate.connection.password" value=""/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.hbm2ddl.auto" value="create"/>
+        </properties>
+    </persistence-unit>
+
+</persistence>
